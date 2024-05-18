@@ -1,4 +1,4 @@
-package main
+package dlass
 
 import (
 	"math/bits"

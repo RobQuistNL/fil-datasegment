@@ -1,10 +1,11 @@
-package main
+package dlass
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	logging "github.com/ipfs/go-log/v2"
 	"io"
 	"math/rand"
 	"net/http"
@@ -26,6 +27,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 )
+
+var log = logging.Logger(fmt.Sprintf("%s(%d)", "dlass", os.Getpid()))
 
 type Agg struct {
 	FRC58CommP *WrCommP `json:"frc58_aggregate"`
@@ -59,7 +62,7 @@ var (
 	existingCount = new(int64)
 )
 
-var downloadAndAssemble = &ufcli.Command{
+var DownloadAndAssemble = &ufcli.Command{
 	Usage: "Assemble FRC58 aggregate from a supplied manifest",
 	Name:  "from-manifest",
 	Flags: []ufcli.Flag{
@@ -134,7 +137,7 @@ var downloadAndAssemble = &ufcli.Command{
 			return xerrors.New("for the time being input manifest must specify a `frc58_aggregate` CID")
 		}
 
-		return aggManifest.startDownload(cctx.Context, showProgress)
+		return aggManifest.StartDownload(cctx.Context, showProgress)
 	},
 }
 
