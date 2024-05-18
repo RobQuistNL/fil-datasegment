@@ -56,6 +56,10 @@ var (
 	maxConcurrency    uint
 	maxRetries        uint
 	segmentTimeout    uint
+
+	dlBytes       = new(int64)
+	dlCount       = new(int64)
+	existingCount = new(int64)
 )
 
 var DownloadAndAssemble = &ufcli.Command{
@@ -321,9 +325,6 @@ func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, s
 }
 
 func doTask(ctx context.Context, p pieceTask, segmentBuf []byte, maybeExisting bool, maxRetries int) error {
-	dlBytes := new(int64)
-	dlCount := new(int64)
-	existingCount := new(int64)
 
 	// just a zerofill
 	//
