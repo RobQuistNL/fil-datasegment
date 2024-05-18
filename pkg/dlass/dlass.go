@@ -137,11 +137,11 @@ var DownloadAndAssemble = &ufcli.Command{
 			return xerrors.New("for the time being input manifest must specify a `frc58_aggregate` CID")
 		}
 
-		return aggManifest.StartDownload(cctx.Context, outFilename, showProgress)
+		return aggManifest.StartDownload(cctx.Context, outFilename, showProgress, int(maxConcurrency))
 	},
 }
 
-func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, showProgressBar bool) error {
+func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, showProgressBar bool, maxConcurrency int) error {
 	// validate and prep list
 	//
 	toProccess := make([]pieceTask, len(aggManifest.PieceList))
@@ -300,7 +300,7 @@ func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, s
 		}()
 	}
 
-	eg.SetLimit(int(maxConcurrency))
+	eg.SetLimit(maxConcurrency)
 	for _, p := range toProccess {
 		if ctx.Err() != nil {
 			break
