@@ -138,10 +138,6 @@ var DownloadAndAssemble = &ufcli.Command{
 }
 
 func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, showProgressBar bool, maxConcurrency int, segmentTimeout uint, linearWalk bool, maxRetries int) error {
-	dlBytes := new(int64)
-	dlCount := new(int64)
-	existingCount := new(int64)
-
 	// validate and prep list
 	//
 	toProccess := make([]pieceTask, len(aggManifest.PieceList))
@@ -325,6 +321,9 @@ func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, s
 }
 
 func doTask(ctx context.Context, p pieceTask, segmentBuf []byte, maybeExisting bool, maxRetries int) error {
+	dlBytes := new(int64)
+	dlCount := new(int64)
+	existingCount := new(int64)
 
 	// just a zerofill
 	//
