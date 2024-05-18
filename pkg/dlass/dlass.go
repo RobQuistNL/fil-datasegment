@@ -137,11 +137,11 @@ var DownloadAndAssemble = &ufcli.Command{
 			return xerrors.New("for the time being input manifest must specify a `frc58_aggregate` CID")
 		}
 
-		return aggManifest.StartDownload(cctx.Context, outFilename, showProgress, int(maxConcurrency), segmentTimeout, linearWalk)
+		return aggManifest.StartDownload(cctx.Context, outFilename, showProgress, int(maxConcurrency), segmentTimeout, linearWalk, int(maxRetries))
 	},
 }
 
-func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, showProgressBar bool, maxConcurrency int, segmentTimeout uint, linearWalk bool) error {
+func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, showProgressBar bool, maxConcurrency int, segmentTimeout uint, linearWalk bool, maxRetries int) error {
 	// validate and prep list
 	//
 	toProccess := make([]pieceTask, len(aggManifest.PieceList))
@@ -309,7 +309,7 @@ func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, s
 		eg.Go(func() error {
 			ctx, closer := context.WithDeadline(ctx, time.Now().Add(time.Duration(segmentTimeout)*time.Second))
 			defer closer()
-			return doTask(ctx, p, aggBuf[p.startOffset:p.startOffset+p.segmentSize], maybeExisting)
+			return doTask(ctx, p, aggBuf[p.startOffset:p.startOffset+p.segmentSize], maybeExisting, maxRetries)
 		})
 	}
 
@@ -324,7 +324,7 @@ func (aggManifest *Agg) StartDownload(ctx context.Context, outFilename string, s
 	return err
 }
 
-func doTask(ctx context.Context, p pieceTask, segmentBuf []byte, maybeExisting bool) error {
+func doTask(ctx context.Context, p pieceTask, segmentBuf []byte, maybeExisting bool, maxRetries int) error {
 
 	// just a zerofill
 	//
@@ -359,7 +359,7 @@ func doTask(ctx context.Context, p pieceTask, segmentBuf []byte, maybeExisting b
 		return cmn.WrErr(err)
 	}
 
-	client := retryingClient(int(maxRetries), 3*time.Second, 15*time.Second)
+	client := retryingClient(maxRetries, 3*time.Second, 15*time.Second)
 
 	resp, err := client.Do(request)
 	if err != nil {
