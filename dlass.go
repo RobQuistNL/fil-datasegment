@@ -138,7 +138,7 @@ var downloadAndAssemble = &ufcli.Command{
 	},
 }
 
-func (aggManifest *Agg) startDownload(ctx context.Context, showProgressBar bool) error {
+func (aggManifest *Agg) StartDownload(ctx context.Context, showProgressBar bool) error {
 	// validate and prep list
 	//
 	toProccess := make([]pieceTask, len(aggManifest.PieceList))
